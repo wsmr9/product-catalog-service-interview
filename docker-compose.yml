@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  mysql-product:
+    image: mysql:5
+    environment:
+      - MYSQL_DATABASE=product_catalog
+      - MYSQL_ROOT_PASSWORD=admin123
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql_data_product:/var/lib/mysql
+
+  phpmyadmin-product:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin123
+      - PMA_HOST=mysql-product
+    ports:
+      - 8080:80
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=order_management
+      - POSTGRES_USER=wayner
+      - POSTGRES_PASSWORD=admin123
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data_order:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - 5050:80
