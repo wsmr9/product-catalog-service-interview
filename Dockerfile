@@ -13,5 +13,13 @@ RUN npm install
 # Bundle the app source inside the Docker image
 COPY . .
 
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
+ARG DB_DIALECT
+ENV DB_DIALECT=${DB_DIALECT}
+
+EXPOSE 3001
+
 # Define the command to run your app using CMD which defines your runtime
 CMD ["node", "index.js"]
