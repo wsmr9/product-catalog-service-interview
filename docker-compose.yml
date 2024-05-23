@@ -1,33 +1,36 @@
-version: '3.3'
+version: '3.3'  # Specifies the version of the Docker Compose file format. Version 3.3 supports newer features and is suitable for production environments with Docker Swarm.
 
 services:
+  # Defines a service for a MySQL database.
   mysql-product:
-    image: mysql:5
+    image: mysql:5  # Specifies the Docker image to use, here it's MySQL version 5.
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}  # Sets the MySQL database name, retrieved from an environment variable.
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}  # Sets the MySQL root password, retrieved from an environment variable.
     ports:
-      - "3306:3306"
+      - "3306:3306"  # Maps port 3306 on the host to port 3306 on the container, which is the default MySQL port.
     volumes:
-      - ./mysql_data_product:/var/lib/mysql
+      - ./mysql_data_product:/var/lib/mysql  # Maps a directory from the host (./mysql_data_product) to a directory in the container (/var/lib/mysql) to persist database data.
 
+  # Defines a service for phpMyAdmin, a web interface for managing MySQL databases.
   phpmyadmin-product:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin  # Specifies the Docker image for phpMyAdmin.
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - PMA_HOST=${PMA_HOST}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}  # Passes the MySQL root password to phpMyAdmin.
+      - PMA_HOST=${PMA_HOST}  # Sets the host for phpMyAdmin to connect to, which will be the MySQL service.
     ports:
-      - "8080:80"
+      - "8080:80"  # Maps port 8080 on the host to port 80 on the container, where phpMyAdmin is accessed.
 
+  # Defines a service for the application.
   app:
-    build: .
+    build: .  # Builds the Docker image for the application using the Dockerfile in the current directory.
     ports:
-      - "3001:3001"
+      - "3001:3001"  # Maps port 3001 on the host to port 3001 on the container, used by the application.
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - DB_DIALECT=${DB_DIALECT}
+      - DATABASE_URL=${DATABASE_URL}  # Sets the database URL, retrieved from an environment variable, for the application to connect to the database.
+      - DB_DIALECT=${DB_DIALECT}  # Sets the database dialect (e.g., MySQL, PostgreSQL), retrieved from an environment variable.
     depends_on:
-      - mysql-product
+      - mysql-product  # Specifies that this service depends on the mysql-product service, ensuring it starts first.
 
 
 
