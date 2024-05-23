@@ -14,8 +14,8 @@ This guide will walk you through the setup and installation process for the Node
 Clone the project repository and navigate into the directory:
 
 ```bash
-    git clone [URL of the repository]
-    cd [repository-name]
+    git clone https://github.com/wsmr9/product-catalog-service-interview.git
+    cd product-catalog-service-interview
 ```
 
 ### Step 2: Set Up Environment Variables
