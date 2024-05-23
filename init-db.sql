@@ -1,3 +1,16 @@
+-- Connect to the 'product_catalog' database
+USE product_catalog;
+
+-- Create the 'products' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- Check if the 'products' table is empty, and if so, populate it with 10 realistic products
 INSERT INTO products (name, image, description, price, created_at)
