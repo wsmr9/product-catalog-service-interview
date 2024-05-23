@@ -18,6 +18,7 @@ app.use(express.json());
 
 // Define a whitelist of domains that can access the API
 const whitelist = ['http://localhost:3000'];
+
 const corsOptions = {
   origin: (origin, callback) => {
     // Check if the request origin is in the whitelist or not present (server-to-server requests)

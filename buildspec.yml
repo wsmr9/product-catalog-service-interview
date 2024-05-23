@@ -1,21 +1,31 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+      - npm install -g semantic-release @semantic-release/changelog @semantic-release/git
+      - npm install -g @semantic-release/exec @semantic-release/gitlab
+      - npm install -g @semantic-release/github
+
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
       - echo $AWS_DEFAULT_REGION
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 179916365881.dkr.ecr.us-east-1.amazonaws.com
-
       - REPOSITORY_URI=179916365881.dkr.ecr.us-east-1.amazonaws.com/product-management-service-ecr
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
+
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG --build-arg DATABASE_URL=$DATABASE_URL --build-arg DB_DIALECT=$DB_DIALECT .
       - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+      - semantic-release
+
   post_build:
     commands:
       - echo Pushing the Docker image...
@@ -25,4 +35,5 @@ phases:
       - printf '[{"name":"container-name","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-    files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
