@@ -1,35 +1,27 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      nodejs: 20
-    commands:
-      - npm install -g semantic-release @semantic-release/changelog @semantic-release/git
-      - npm install -g @semantic-release/exec @semantic-release/gitlab
-      - npm install -g @semantic-release/github
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - echo $AWS_DEFAULT_REGION
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 179916365881.dkr.ecr.us-east-1.amazonaws.com
-      - REPOSITORY_URI=179916365881.dkr.ecr.us-east-1.amazonaws.com/product-management-service-ecr
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo Logging in to Amazon ECR...  # Log message indicating the login process to Amazon ECR.
+      - echo $AWS_DEFAULT_REGION # Displays the AWS region configured for this environment.
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 179916365881.dkr.ecr.us-east-1.amazonaws.com # Authenticates to Amazon ECR to enable pushing Docker images.
+      - REPOSITORY_URI=179916365881.dkr.ecr.us-east-1.amazonaws.com/product-management-service-ecr # Sets the ECR repository URI where the Docker image will be stored.
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7) # Retrieves the current commit hash truncated to the first 7 characters.
+      - IMAGE_TAG=${COMMIT_HASH:=latest}  # Uses the commit hash as the Docker image tag; defaults to 'latest' if not available.
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG --build-arg DATABASE_URL=$DATABASE_URL --build-arg DB_DIALECT=$DB_DIALECT .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
-      - semantic-release
+      - echo Build started on `date` # Displays the date and time the build started.
+      - echo Building the Docker image...  # Log message indicating the start of the Docker image build.
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG --build-arg DATABASE_URL=$DATABASE_URL --build-arg DB_DIALECT=$DB_DIALECT . # Builds the Docker image using environment variables for database configuration.
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest # Tags the newly built image also as 'latest'.
   post_build:
     commands:
-      - echo Pushing the Docker image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - docker push $REPOSITORY_URI:latest
-      - echo Writing image definitions file...
-      - printf '[{"name":"container-name","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Pushing the Docker image...  # Log message indicating that the Docker image is being pushed to ECR.
+      - docker push $REPOSITORY_URI:$IMAGE_TAG # Pushes the Docker image tagged with the commit hash to ECR.
+      - docker push $REPOSITORY_URI:latest # Pushes the Docker image tagged as 'latest' to ECR.
+      - echo Writing image definitions file... # Log message indicating the creation of the image definitions file.
+      - printf '[{"name":"container-name","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json  # Writes an image definitions file needed for the deployment process.
 
 artifacts:
-    files: imagedefinitions.json
+    files: imagedefinitions.json # Specifies the output files to be stored as artifacts of the build process.
